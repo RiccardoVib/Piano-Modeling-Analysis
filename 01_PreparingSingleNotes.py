@@ -3,19 +3,15 @@ import os
 import pickle
 from FeatureExtraction import extract_all_features
 
-#bigger: win_length=1024, hop_length=512, n_bands=6, n_bins=72, n_mfcc=20
-#ultrasmall: win_length=2048, hop_length=2048, n_bands=3, n_bins=3, n_mfcc=3)
-#small: win_length=1024, hop_length=512, n_bands=3, n_bins=3, n_mfcc=3)
-#normal: win_length=2048, hop_length=2048
-#window = 44100//2
-
 win_length=1024
 hop_length=512
 
-def preparing_features():
-    data_dir = '../../../Analysis/Note_collector'
+def preparing_features(data_dir):
 
-    #########
+    """
+      prepare the features for the case of single notes
+    """
+
     data = open(os.path.normpath('/'.join([data_dir, 'RealPianoAllNotes.pickle'])), 'rb')
     Z = pickle.load(data)
     real_piano, real_features = extract_all_features(Z, type='real', win_length=win_length, hop_length=hop_length, n_bands=6, n_bins=72, n_mfcc=20)
@@ -38,8 +34,10 @@ def preparing_features():
 
 
 
-def preparing_features_diff():
-    data_dir = '../../../Analysis/Note_collector'
+def preparing_features_diff(data_dir):
+    """
+      prepare the features for the case of chords and repeated notes
+    """
 
     #differences
     data = open(os.path.normpath('/'.join([data_dir, 'RealPianosDifferences2.pickle'])), 'rb')
@@ -123,5 +121,5 @@ def preparing_features_diff():
 
 if __name__ == '__main__':
 
-    preparing_features_diff()
-    #preparing_features()
+    preparing_features_diff(data_dir)
+    preparing_features(data_dir)
