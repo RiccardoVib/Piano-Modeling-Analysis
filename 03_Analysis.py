@@ -7,9 +7,9 @@ import os
 import pickle
 import numpy as np
 
-    """
-      LDA fitting and projection of the features vectors
-    """
+"""
+LDA fitting and projection of the features vectors
+"""
 
 
 """ single notes """
