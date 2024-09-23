@@ -4,6 +4,13 @@ import pickle
 from FeatureExtraction import Spectral_Kurtosis, Spectral_Skewness
 
 def createDataset(Z, size):
+
+    
+    """
+      create the feature vectors for the single notes case, which include the audio descriptors differences of different velocities
+    """
+
+    
     real_piano = Z['real_piano']
     real_features = Z['real_features']
     disk_piano = Z['disk_piano']
@@ -11,7 +18,7 @@ def createDataset(Z, size):
     digital_piano = Z['digital_piano']
     digital_features = Z['digital_features']
     del Z
-    arr = [-1, 6, 14, 19, 30, 35, 44, 50, 57, 65, 78, 93, 104, 108, 115, 126, 131, 138, 150, 157, 163]
+    arr = [-1, 6, 14, 19, 30, 35, 44, 50, 57, 65, 78, 93, 104, 108, 115, 126, 131, 138, 150, 157, 163] # indexes to pick the notes at specific chosen velocities
     p, f = [], []
     for i in range(len(arr) - 1):
         p.append(real_piano[arr[i] + 1:arr[i + 1]])
@@ -109,21 +116,8 @@ def createDataset(Z, size):
             examples['d'].append(distance)
         else:
             continue
-    file_data = None
-    if size=='smaller':
-        file_data = open(os.path.normpath('/'.join([data_dir, 'AllExamples_smaller.pickle'])), 'wb')
-    elif size=='bigger':
-        file_data = open(os.path.normpath('/'.join([data_dir, 'AllExamples_bigger.pickle'])), 'wb')
-    elif size == 'normal':
-        file_data = open(os.path.normpath('/'.join([data_dir, 'AllExamples.pickle'])), 'wb')
-    elif size == 'ultrasmall':
-        file_data = open(os.path.normpath('/'.join([data_dir, 'AllExamples_ultrasmall.pickle'])), 'wb')
-    elif size == 'superbig':
-        file_data = open(os.path.normpath('/'.join([data_dir, 'AllExamples_superbig.pickle'])), 'wb')
-    elif size == 'mean':
-        file_data = open(os.path.normpath('/'.join([data_dir, 'AllExamples_mean.pickle'])), 'wb')
-    elif size == 'win':
-        file_data = open(os.path.normpath('/'.join([data_dir, 'AllExamples_aligned.pickle'])), 'wb')
+   
+    file_data = open(os.path.normpath('/'.join([data_dir, 'AllExamples_aligned.pickle'])), 'wb')
 
     c = []
     type_of_piano = []
@@ -157,6 +151,9 @@ def createDataset(Z, size):
 ##################
 
 def createDataset_diff(Z):
+    """
+      create the feature vectors for chords and repeated notes cases, which include the audio descriptors differences of different velocities
+    """
 
     examples_ch = {'pianos': [], 'labels': [], 'f': [], 'vels': [], 'c': [], 'type': []}
     examples_rep = {'pianos': [], 'labels': [], 'f': [], 'vels': [], 'c': [], 'type': []}
