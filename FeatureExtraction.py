@@ -16,14 +16,16 @@ def histogram_of_gradients(x):
                     cells_per_block=(1, 1), visualize=True, channel_axis=-1)
     return hog_image
 
-#mel
+
 def MFCC(x, fs=44100, n_mfcc=20, frame_size=1024, hop_length=512):
-    #plt.rcParams['figure.figsize'] = (18,4)
-    #librosa.display.waveplot(x, sr=fs)
-    #mfccs = librosa.feature.mfcc(x, sr=fs)
-    #print(mfccs.shape)
-    #mfccs = sklearn.preprocessing.scale(mfccs, axis=1)
-    #librosa.display.specshow(mfccs, sr=fs, x_axis='time')
+"""
+compute MFCCs
+    :param x: input signal
+    :param fs: sampling rate
+    :param n_mfcc: number of mel coefficients
+    :param frame_size: size of the frame
+    :param hop_length: hop size
+"""
 
     S = librosa.feature.melspectrogram(y=x, sr=fs, hop_length=hop_length, win_length=frame_size)
     log_mfcc = librosa.feature.mfcc(S=librosa.power_to_db(S), n_mfcc=n_mfcc)
@@ -37,21 +39,40 @@ def MFCC(x, fs=44100, n_mfcc=20, frame_size=1024, hop_length=512):
     return log_mfcc_mean, log_mfcc_var, log_mfcc_skew, log_mfcc_kur
 
 def amplitude_envelope(signal, frame_size=1024, hop_length=512):
+"""
+compute amplitude envelope
+    :param signal: input signal
+    :param frame_size: size of the frame
+    :param hop_length: hop size
+"""
+    
   return np.array([max(signal[i:i+frame_size]) for i in range(0, signal.size, hop_length)])
 
-# Normalising the spectral centroid for visualisation
+
 def normalize(x, axis=0):
+"""
+    Normalising the input
+"""
     return sklearn.preprocessing.minmax_scale(x, axis=axis)
 
-#temporal centroid
 def TC(x):
+"""
+compute temporal centroid
+    :param x: input signal
+   
+"""
     rmse, _ = energy(x, 1, 1)
     tot_e = sum(abs(x ** 2))
     tc = sum(rmse*x) / tot_e
     return tc
 
 def spectral_rolloff(x, hop_length=512, win_length=1024):
-
+"""
+compute spectral rolloff
+    :param x: input signal
+    :param win_length: size of the frame
+    :param hop_length: hop size
+"""
     sr = librosa.feature.spectral_rolloff(x, sr=44100, hop_length=hop_length, n_fft=win_length)[0]
     sr_mean = np.mean(sr)
     sr_var = np.var(sr)
@@ -60,6 +81,11 @@ def spectral_rolloff(x, hop_length=512, win_length=1024):
     return sr_mean, sr_var, sr_skew, sr_kur
 
 def LogAttTime(x, sr=44100):
+"""
+compute log attack time
+    :param x: input signal
+    :param sr: sampling rate
+"""
     _startThreshold = 0.2
     _stopThreshold = 0.9
 
@@ -86,19 +112,26 @@ def LogAttTime(x, sr=44100):
 
     attackTime = attackStop - attackStart
 
-    #if (attackTime > 10e-5):
     logAttackTime = np.log10(attackTime)
-    #else:
-    #    logAttackTime = -5
     return logAttackTime
 
 
 def Spectral_Kurtosis(x):
-    #x = scipy.fft.fft(x)[:len(x//2)]
+"""
+compute Spectral Kurtosis
+    :param x: input signal
+  
+"""
     return scipy.stats.kurtosis(x)
 
 def spectral_contrast(x, hop_length=512, win_length=1024, n_bands=6):
-
+"""
+compute spectral contrast
+    :param x: input signal
+    :param win_length: size of the frame
+    :param hop_length: hop size
+    :param n_bands: hop number of bands
+"""
     sc = librosa.feature.spectral_contrast(x, hop_length=hop_length, n_fft=win_length, n_bands=n_bands)
     sc_mean = np.mean(sc, axis=1)
     sc_var = np.var(sc, axis=1)
@@ -107,10 +140,19 @@ def spectral_contrast(x, hop_length=512, win_length=1024, n_bands=6):
     return sc_mean, sc_var, sc_skew, sc_kur
 
 def Spectral_Skewness(x):
-    #x = scipy.fft.fft(x)
+"""
+compute Spectral Skewness
+    :param x: input signal
+  
+"""
     return scipy.stats.skew(x)
 
 def autocorrelation(x):
+ """
+compute autocorrelation
+    :param x: input signal
+  
+"""   
     x = np.array(x)
     # Mean
     mean = np.mean(x)
@@ -125,7 +167,12 @@ def autocorrelation(x):
 #Zero-crossing-rate
 
 def ZCR(x):
-    zcrs = librosa.feature.zero_crossing_rate(x)# + 0.0001)
+"""
+compute zero crossing rate
+    :param x: input signal
+  
+"""   
+    zcrs = librosa.feature.zero_crossing_rate(x)
     #plt.figure(figsize=(18, 5))
     #plt.plot(zcrs[0])
     #plt.title('ZCR')
@@ -133,21 +180,29 @@ def ZCR(x):
 
 #Energy
 def energy(x, hop_length = 512, frame_length = 1024):
-    #n_fft = 1
+"""
+compute the energy of the signal
+    :param x: input signal
+    :param frame_length: size of the frame
+    :param hop_length: hop size
+"""  
+
     rmse = librosa.feature.rms(x, frame_length=frame_length, hop_length=hop_length, center=True)
-    #print(rmse.shape)
+
     rmse = rmse[0]
     energy = np.array([
         sum(abs(x[i:i+frame_length]**2))
         for i in range(0, len(x), hop_length)])
     return rmse, energy
 
-#spectral irregularity
 
-#hatmonics-to-noise-ratio (inharmonicity)
-
-#Spectral flux
 def spectral_flux(wavedata, win_length=1024, hop_length=512):
+"""
+compute Spectral flux
+    :param wavedata: input signal
+    :param win_length: size of the frame
+    :param hop_length: hop size
+"""  
     # convert to frequency domain
     magnitude_spectrum = librosa.stft(wavedata, n_fft=win_length, hop_length=hop_length)
     timebins, freqbins = np.shape(magnitude_spectrum)
@@ -161,16 +216,16 @@ def spectral_flux(wavedata, win_length=1024, hop_length=512):
     sf_kur = scipy.stats.kurtosis(sf[1:])
     return sf_mean, sf_var, sf_skew, sf_kur
 
-#Spectral Centroid
 def SpectralCentroid(x, hop_length=512, win_length=1024, fs=44100):
-    #plt.rcParams['figure.figsize'] = (18,4)
+"""
+compute Spectral Centroid
+    :param x: input signal
+    :param win_length: size of the frame
+    :param hop_length: hop size
+    :param fs: sampling rate
+"""  
+
     cent = librosa.feature.spectral_centroid(x, hop_length=hop_length, n_fft=win_length, sr=fs)
-    #plt.figure()
-    #plt.subplot(2, 1, 1)
-    #plt.semilogy(cent.T, label='Spectral centroid')
-    #plt.ylabel('Hz')
-    #plt.xticks([])
-    #plt.xlim([0, cent.shape[-1]])
     sc_mean = np.mean(cent[0])
     sc_var = np.var(cent[0])
     sc_skew = scipy.stats.skew(cent[0])
@@ -178,8 +233,15 @@ def SpectralCentroid(x, hop_length=512, win_length=1024, fs=44100):
     return sc_mean, sc_var, sc_skew, sc_kur
 
 
-#Constant Q-transform (CQT)
 def CQT(x, hop_length=512, n_bins=72, fs=44100):
+"""
+compute Constant Q-transform (CQT)
+    :param x: input signal
+    :param hop_length: hop size
+    :param n_bins: number of bins
+    :param fs: sampling rate
+"""  
+
     #%matplotlib inline
     fmin = librosa.midi_to_hz(36)
 
@@ -195,7 +257,12 @@ def CQT(x, hop_length=512, n_bins=72, fs=44100):
     return np.abs(cqt_mean), np.abs(cqt_var), np.abs(cqt_skew), np.abs(cqt_kur)
 
 def energy_bands(S, freq_bins):
-
+"""
+compute energy in two different bands: [150, 750] and [750, -]
+    :param S: input signal spectrum
+    :param freq_bins: frequency bins of the spectrum
+  
+"""  
     index1 = np.where(freq_bins > 150)[0][0]
     index2 = np.where(freq_bins < 750)[0][-1] + 1
 
@@ -204,8 +271,14 @@ def energy_bands(S, freq_bins):
 
     return [e1, e2]
 
-def collect_peaks(data_dir, spectra_db, index, height, distance=400):
-
+def collect_peaks(spectra_db, index, height, distance=400):
+"""
+compute the first five harmonics of the spectrum
+    :param spectra_db: input signal spectrum in decibel
+    :param index: frequency bin from where the search starts
+    :param height: minimum height for the peaks
+    :param distance: minimum distance between the peaks
+"""  
     peaks, _ = find_peaks(spectra_db[index:], height=height, distance=distance)
     fig, ax = plt.subplots(nrows=1, ncols=1)
     ax.semilogx(spectra_db)
@@ -218,7 +291,11 @@ def collect_peaks(data_dir, spectra_db, index, height, distance=400):
     return peaks_db
 
 def difference_chord(spectrums):
-
+"""
+compute the difference between the spectrum of the chord and the sum of the notes composing the chords
+    :param spectrums: input signal spectrum
+  
+"""  
     spectra_db0 = 10 * np.log10(np.abs(mag_smoothing(spectrums[0], 64)))
     spectra_db1 = 10 * np.log10(np.abs(mag_smoothing(spectrums[1], 64)))
     spectra_db2 = 10 * np.log10(np.abs(mag_smoothing(spectrums[2], 64)))
@@ -232,6 +309,11 @@ def difference_chord(spectrums):
     return [s[:8000], s[8000:8000*2], s[8000*2:8000*3], s[8000*3:8000*4], s[8000*4:8000*5]]
 
 def difference_rep(spectrums):
+"""
+compute the difference between the spectrum of the repeated note and the same note played isolated
+    :param spectrums: input signal spectrum
+  
+"""  
     spectra_db0 = 10 * np.log10(np.abs(mag_smoothing(spectrums[0], 64)))
     spectra_db1 = 10 * np.log10(np.abs(mag_smoothing(spectrums[1], 64)))
     s = spectra_db1 - spectra_db0
@@ -239,15 +321,37 @@ def difference_rep(spectrums):
     return [s[:8000], s[8000:8000 * 2], s[8000 * 2:8000 * 3], s[8000 * 3:8000 * 4], s[8000 * 4:8000 * 5]]
 
 def bandwidth(x, hop_length, win_length):
+"""
+compute the bandwidth
+    :param x: input signal
+    :param win_length: size of the frame
+    :param hop_length: hop size
+"""  
     return librosa.feature.spectral_bandwidth(x, sr=44100, n_fft=win_length, hop_length=hop_length)[0]
 
 def entro(x, nperseg):
+"""
+compute the entropy
+    :param x: input signal
+    :param nperseg: Length of each FFT segment
+  
+"""  
     return antropy.spectral_entropy(x, sf=44100, method='fft', nperseg=nperseg, normalize=False, axis=-1)
 
 def rms(x):
+"""
+compute the root mean squared energy of the signal
+    :param x: input signal
+  
+"""  
     return np.sqrt(np.mean(np.power(x, 2)))
 
 def findAttack(x, sr=44100):
+"""
+retrieve the attack time in samples
+    :param x: input signal
+    :param sr: sampling rate  
+"""  
     _startThreshold = 0.2
     maxvalue = max(x)
     startAttack = 0.0
@@ -259,11 +363,22 @@ def findAttack(x, sr=44100):
     return startAttack
 
 def extract_all_features(Z, type, win_length=2048, hop_length=2048, n_bands=6, n_bins=20, n_mfcc=20):
+"""
+extract all features and build the feature vectors
+    :param Z: pickle data containing all the recordings
+    :param type: if real, digital, of diskalvier 
+    :param win_length: frame size
+    :param hop_length: hop size
+    :param n_bands: number of bins to bands (for spectral contrast)
+    :param n_bins: number of bins to compute (for CQT)
+    :param n_mfcc: number of mel coefficients to compute
+"""  
     piano_info, features = [], []
     data_dir = '../../../Analysis/Note_collector'
     data = None
-    lag = 5000
+    lag = 0#5000
     sustain = 60000
+    # retrive the precomputed harmonics
     if type == 'real':
         data = open(os.path.normpath('/'.join([data_dir, 'all_peaks_real_piano.pickle'])), 'rb')
     elif type == 'disk':
@@ -290,6 +405,7 @@ def extract_all_features(Z, type, win_length=2048, hop_length=2048, n_bands=6, n
             note_ = Z1['note'][ind]
             vel_ = Z1['vel'][ind]
 
+            #check if there are misalignment between the recordings and related precomputed harmonics
             if name_ != name or note_ != note or vel_ != vel:
                 print('wrong')
 
