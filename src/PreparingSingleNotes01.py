@@ -119,7 +119,7 @@ def preparing_features_diff(data_dir):
     file_data.close()
     return
 
-if __name__ == '__main__':
-
-    preparing_features_diff(data_dir)
-    preparing_features(data_dir)
+# if __name__ == '__main__':
+#
+#     preparing_features_diff(data_dir)
+#     preparing_features(data_dir)
